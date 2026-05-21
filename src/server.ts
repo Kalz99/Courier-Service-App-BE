@@ -13,6 +13,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/shipments", shipmentRoutes);
+app.use("/api", shipmentRoutes);
 
 const PORT = process.env.PORT || 5000;
 

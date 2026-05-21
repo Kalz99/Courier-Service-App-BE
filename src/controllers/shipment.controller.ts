@@ -114,3 +114,52 @@ export async function findByUserId(req: AuthenticatedRequest, res: Response): Pr
     }
 }
 
+export async function updateShipmentStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+        const shipmentIdParam = req.params.id;
+
+        const shipmentId = Array.isArray(shipmentIdParam) ? shipmentIdParam[0] : shipmentIdParam;
+
+        if (!shipmentId || shipmentId.trim() === "") {
+            throw new AppError("A valid shipment ID string is required in the URL path.", 400);
+        }
+
+        const { status } = req.body;
+        if (!status || typeof status !== "string" || status.trim() === "") {
+            throw new AppError("A valid status string is required in the request body.", 400);
+        }
+
+        const loggedInUser = req.user;
+        if (!loggedInUser) {
+            res.status(401).json({ success: false, message: "Unauthorized. Authentication is required." });
+            return;
+        }
+        if (loggedInUser.role !== "admin") {
+            res.status(403).json({
+                success: false,
+                message: "Access denied. Only administrators can update shipment statuses."
+            });
+            return;
+        }
+
+        const updatedShipment = await shipmentService.updateShipmentStatus(shipmentId, status.trim());
+
+        res.status(200).json({
+            success: true,
+            message: "Shipment status updated successfully",
+            data: updatedShipment,
+        });
+
+    } catch (error: unknown) {
+        if (error instanceof AppError) {
+            res.status(error.statusCode).json({ success: false, message: error.message });
+            return;
+        }
+
+        console.error("Error in updateShipmentStatus controller:", error);
+        res.status(500).json({
+            success: false,
+            message: "An unexpected error occurred during shipment status update."
+        });
+    }
+}

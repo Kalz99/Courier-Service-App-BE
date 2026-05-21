@@ -77,3 +77,26 @@ export async function searchShipments(trackingNumber: string): Promise<ShipmentR
 
     return await shipmentRepository.findByTrackingNumber(trackingNumber);
 }
+
+const updateShipmentStatusSchema = z.object({
+    id: z.string({ message: "Shipment ID is required" }).trim().min(1, "Shipment ID must be valid"),
+    status: z.enum(["Pending", "In Transit", "Out for Delivery", "Delivered", "Cancelled"], {
+        message: "Invalid shipment status. Allowed values: Pending, In Transit, Out for Delivery, Delivered, Cancelled"
+    })
+});
+
+export async function updateShipmentStatus(id: string, status: string): Promise<ShipmentRow> {
+    const parseResult = updateShipmentStatusSchema.safeParse({ id, status });
+    if (!parseResult.success) {
+        const firstError = parseResult.error.issues[0]?.message || "Validation error";
+        throw new AppError(firstError, 400);
+    }
+
+    const updatedShipment = await shipmentRepository.updateStatus(parseResult.data.id, parseResult.data.status);
+    if (!updatedShipment) {
+        throw new AppError("Shipment not found", 404);
+    }
+
+    return updatedShipment;
+}
+

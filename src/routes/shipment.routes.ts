@@ -8,6 +8,8 @@ router.post("/create-shipment", authenticateJWT, shipmentController.createShipme
 router.get("/get-shipment", authenticateJWT, shipmentController.getShipments);
 router.get("/search-shipment", shipmentController.searchShipment);
 router.get("/get-my-shipment", authenticateJWT, shipmentController.findByUserId);
+router.patch("/update-shipment/:id/status", authenticateJWT, shipmentController.updateShipmentStatus);
 
 export default router;
+
 
