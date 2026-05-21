@@ -15,7 +15,9 @@ const registerSchema = z.object({
         .min(6, "Password must be at least 6 characters long"),
     address: z.string({ message: "Address must be a valid text" }).trim().optional(),
     businessName: z.string({ message: "Business name must be a valid text" }).trim().optional(),
-    phone: z.string({ message: "Phone must be a valid text" }).trim().optional(),
+    phone: z.string({ message: "Phone number is required" })
+        .trim()
+        .min(1, "Phone number is required"),
     role: z.string().trim().optional(),
 });
 
