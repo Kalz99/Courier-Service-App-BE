@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { authRepository } from "../repository/auth.repository.js";
 import { AppError } from "../utils/errors.js";
-import type { UserRow, UserResponse, AuthResponse, RegisterInput } from "../types/auth.types.js";
+import type { UserRow, UserResponse, AuthResponse, RegisterInput, LoginInput } from "../types/auth.types.js";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRY = (process.env.JWT_EXPIRY) as any;
@@ -11,9 +11,7 @@ if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined");
 }
 
-/**
- * Registers a new user. 
- */
+
 export async function registerUser(input: RegisterInput): Promise<AuthResponse> {
     const { name, email, password, address, businessName, phone, role } = input;
 
@@ -45,6 +43,33 @@ export async function registerUser(input: RegisterInput): Promise<AuthResponse> 
 
     return {
         user: newUserResponse,
+        token,
+    };
+}
+
+export async function loginUser(input: LoginInput): Promise<AuthResponse> {
+    const { email, password } = input;
+
+    const user = await authRepository.findByEmail(email);
+    if (!user || !user.password) {
+        throw new AppError("Invalid email or password", 401);
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        throw new AppError("Invalid email or password", 401);
+    }
+
+    const userResponse = mapToUserResponse(user);
+
+    const token = jwt.sign(
+        { userId: userResponse.id, email: userResponse.email, role: userResponse.role },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRY }
+    );
+
+    return {
+        user: userResponse,
         token,
     };
 }

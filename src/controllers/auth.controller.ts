@@ -20,6 +20,14 @@ const registerSchema = z.object({
 });
 
 
+const loginSchema = z.object({
+    email: z.string({ message: "Email is required" })
+        .trim()
+        .min(1, "Email is required!"),
+    password: z.string({ message: "Password is required" })
+        .min(1, "Password is required!"),
+});
+
 
 function validateBody<T>(schema: z.Schema<T>, req: Request, res: Response): T | null {
     const parseResult = schema.safeParse(req.body);
@@ -31,9 +39,7 @@ function validateBody<T>(schema: z.Schema<T>, req: Request, res: Response): T | 
     return parseResult.data;
 }
 
-/**
- * user registration request.
- */
+
 export async function register(req: Request, res: Response): Promise<void> {
     try {
         const validatedData = validateBody(registerSchema, req, res);
@@ -52,6 +58,28 @@ export async function register(req: Request, res: Response): Promise<void> {
         }
         console.error("Error in registration controller:", error);
         res.status(500).json({ message: "An unexpected error occurred during registration" });
+    }
+}
+
+
+export async function login(req: Request, res: Response): Promise<void> {
+    try {
+        const validatedData = validateBody(loginSchema, req, res);
+        if (!validatedData) return;
+
+        const authData = await authService.loginUser(validatedData);
+
+        res.status(200).json({
+            message: "Login successful",
+            ...authData,
+        });
+    } catch (error: unknown) {
+        if (error instanceof AppError) {
+            res.status(error.statusCode).json({ message: error.message });
+            return;
+        }
+        console.error("Error in login controller:", error);
+        res.status(500).json({ message: "An unexpected error occurred during login" });
     }
 }
 

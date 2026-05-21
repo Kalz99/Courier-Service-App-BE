@@ -35,3 +35,8 @@ export interface RegisterInput {
   role?: string | undefined;
 }
 
+export interface LoginInput {
+  email: string;
+  password:  string;
+}
+
