@@ -7,7 +7,7 @@ export interface ShipmentRow {
     shipment_type: string;
     weight: number;
     status: string;
-    user_id: number;
+    user_id: string;
     created_at: Date;
 }
 
@@ -19,7 +19,7 @@ export interface CreateShipmentInput {
     shipmentType: string;
     weight: number;
     status?: string;
-    userId: number;
+    userId: string;
 }
 
 export interface CreateShipmentDTO {
@@ -28,5 +28,5 @@ export interface CreateShipmentDTO {
     recipientPhoneNumber: string;
     shipmentType: string;
     weight: number;
-    userId: number;
+    userId: string;
 }

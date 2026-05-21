@@ -1,7 +1,7 @@
 import type { Request } from "express";
 
 export interface UserRow {
-    id: number;
+    id: string;
     name: string;
     email: string;
     password?: string;
@@ -13,7 +13,7 @@ export interface UserRow {
 }
 
 export interface UserResponse {
-    id: number;
+    id: string;
     name: string;
     email: string;
     address: string | null;
@@ -43,14 +43,14 @@ export interface LoginInput {
 }
 
 export interface DecodedToken {
-    userId: number;
+    userId: string;
     email: string;
     role: string;
 }
 
 export interface AuthenticatedRequest extends Request {
     user?: {
-        id: number;
+        id: string;
         email: string;
         role: string;
     };

@@ -3,13 +3,7 @@ import jwt from "jsonwebtoken";
 import { authRepository } from "../repository/auth.repository.js";
 import { AppError } from "../utils/errors.js";
 import type { UserRow, UserResponse, AuthResponse, RegisterInput, LoginInput } from "../types/auth.types.js";
-
-const JWT_SECRET = process.env.JWT_SECRET as string;
-const JWT_EXPIRY = (process.env.JWT_EXPIRY) as any;
-
-if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET is not defined");
-}
+import { JWT_SECRET, JWT_EXPIRY } from "../config/jwt.js";
 
 
 export async function registerUser(input: RegisterInput): Promise<AuthResponse> {

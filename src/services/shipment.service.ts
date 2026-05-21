@@ -18,9 +18,9 @@ const createShipmentSchema = z.object({
         .min(1, "Shipment type is required"),
     weight: z.number({ message: "Weight must be a number" })
         .positive("Weight must be greater than zero"),
-    userId: z.number({ message: "User ID is required" })
-        .int("User ID must be an integer")
-        .positive("User ID must be valid"),
+    userId: z.string({ message: "User ID is required" })
+        .trim()
+        .min(1, "User ID must be valid"),
 });
 
 function generateTrackingNumber(): string {
@@ -52,4 +52,11 @@ export async function create(dto: CreateShipmentDTO): Promise<ShipmentRow> {
     });
 
     return shipment;
+}
+
+export async function getShipments(userId: string): Promise<ShipmentRow[]> {
+    if (!userId) {
+        throw new AppError("A valid user ID is required", 400);
+    }
+    return await shipmentRepository.findByUserId(userId);
 }

@@ -1,12 +1,7 @@
 import type { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import type { DecodedToken, AuthenticatedRequest } from "../types/auth.types.js";
-
-const JWT_SECRET = process.env.JWT_SECRET as string;
-
-if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET is not defined");
-}
+import { JWT_SECRET } from "../config/jwt.js";
 
 export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
     const authHeader = req.headers.authorization;

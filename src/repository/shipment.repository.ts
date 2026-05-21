@@ -74,7 +74,7 @@ export class ShipmentRepository {
         return result.rows[0];
     }
 
-    async findByUserId(userId: number): Promise<ShipmentRow[]> {
+    async findByUserId(userId: string): Promise<ShipmentRow[]> {
         const result = await pool.query(
             ShipmentRepository.FIND_BY_USER_ID,
             [userId]
