@@ -1,3 +1,5 @@
+import type { Request } from "express";
+
 export interface UserRow {
   id: number;
   name: string;
@@ -38,5 +40,19 @@ export interface RegisterInput {
 export interface LoginInput {
   email: string;
   password:  string;
+}
+
+export interface DecodedToken {
+    userId: number;
+    email: string;
+    role: string;
+}
+
+export interface AuthenticatedRequest extends Request {
+    user?: {
+        id: number;
+        email: string;
+        role: string;
+    };
 }
 
