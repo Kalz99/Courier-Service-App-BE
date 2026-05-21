@@ -21,3 +21,12 @@ export interface CreateShipmentInput {
     status?: string;
     userId: number;
 }
+
+export interface CreateShipmentDTO {
+    recipientName: string;
+    recipientAddress: string;
+    recipientPhoneNumber: string;
+    shipmentType: string;
+    weight: number;
+    userId: number;
+}

@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import pool from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
+import shipmentRoutes from "./routes/shipment.routes.js";
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/shipments", shipmentRoutes);
 
 const PORT = process.env.PORT || 5000;
 
