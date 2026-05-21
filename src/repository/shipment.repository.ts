@@ -1,28 +1,5 @@
 import pool from "../config/db.js";
-
-export interface ShipmentRow {
-    id: string;
-    tracking_number: string;
-    recipient_name: string;
-    recipient_address: string;
-    recipient_phone_number: string;
-    shipment_type: string;
-    weight: number;
-    status: string;
-    user_id: number;
-    created_at: Date;
-}
-
-export interface CreateShipmentInput {
-    trackingNumber: string;
-    recipientName: string;
-    recipientAddress: string;
-    recipientPhoneNumber: string;
-    shipmentType: string;
-    weight: number;
-    status?: string;
-    userId: number;
-}
+import type { ShipmentRow, CreateShipmentInput } from "../types/shipment.types.js";
 
 export class ShipmentRepository {
     private static readonly CREATE_SHIPMENT = `
@@ -51,6 +28,7 @@ export class ShipmentRepository {
         SELECT id, tracking_number, recipient_name, recipient_address, recipient_phone_number, shipment_type, weight, status, user_id, created_at 
         FROM shipments 
         ORDER BY created_at DESC
+        LIMIT $1 OFFSET $2
     `;
 
     private static readonly UPDATE_STATUS = `
@@ -60,9 +38,13 @@ export class ShipmentRepository {
         RETURNING id, tracking_number, recipient_name, recipient_address, recipient_phone_number, shipment_type, weight, status, user_id, created_at
     `;
 
-    /**
-     * Inserts a new shipment mapping user_id to the logged-in client.
-     */
+    private static readonly FIND_BY_TRACKING_NUMBER = `
+        SELECT id, tracking_number, recipient_name, recipient_address, recipient_phone_number, shipment_type, weight, status, user_id, created_at 
+        FROM shipments 
+        WHERE tracking_number = $1
+    `;
+
+
     async createShipment(input: CreateShipmentInput): Promise<ShipmentRow> {
         const {
             trackingNumber,
@@ -92,9 +74,6 @@ export class ShipmentRepository {
         return result.rows[0];
     }
 
-    /**
-     * Used by clients to only see their own shipment rows.
-     */
     async findByUserId(userId: number): Promise<ShipmentRow[]> {
         const result = await pool.query(
             ShipmentRepository.FIND_BY_USER_ID,
@@ -103,18 +82,24 @@ export class ShipmentRepository {
         return result.rows;
     }
 
-    /**
-     * Used by administrators to view everything in the system.
-     */
-    async findAll(): Promise<ShipmentRow[]> {
-        const result = await pool.query(ShipmentRepository.FIND_ALL);
+    async findByTrackingNumber(trackingNumber: string): Promise<ShipmentRow | null> {
+        const result = await pool.query(
+            ShipmentRepository.FIND_BY_TRACKING_NUMBER,
+            [trackingNumber.trim().toUpperCase()]
+        );
+        return result.rows[0] || null;
+    }
+
+
+    async findAll(limit: number = 10, offset: number = 0): Promise<ShipmentRow[]> {
+        const result = await pool.query(
+            ShipmentRepository.FIND_ALL,
+            [limit, offset]
+        );
         return result.rows;
     }
 
-    /**
-     * Used by administrators to change a tracking state.
-     * Returns the updated shipment row or null if not found.
-     */
+
     async updateStatus(id: string, status: string): Promise<ShipmentRow | null> {
         const result = await pool.query(
             ShipmentRepository.UPDATE_STATUS,
