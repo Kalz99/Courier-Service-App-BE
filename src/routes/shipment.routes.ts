@@ -7,5 +7,7 @@ const router = Router();
 router.post("/create-shipment", authenticateJWT, shipmentController.createShipment);
 router.get("/get-shipment", authenticateJWT, shipmentController.getShipments);
 router.get("/search-shipment", shipmentController.searchShipment);
+router.get("/get-my-shipment", authenticateJWT, shipmentController.findByUserId);
 
 export default router;
+

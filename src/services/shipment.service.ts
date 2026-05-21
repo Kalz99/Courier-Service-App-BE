@@ -61,6 +61,14 @@ export async function getShipments(userId: string): Promise<ShipmentRow[]> {
     return await shipmentRepository.findByUserId(userId);
 }
 
+export async function findByUserId(userId: string): Promise<ShipmentRow[]> {
+    if (!userId) {
+        throw new AppError("A valid user ID is required", 400);
+    }
+    return await shipmentRepository.findByUserId(userId);
+}
+
+
 export async function searchShipments(trackingNumber: string): Promise<ShipmentRow | null> {
     console.log(typeof trackingNumber);
     if (!trackingNumber || typeof trackingNumber !== "string" || trackingNumber.trim() === "") {

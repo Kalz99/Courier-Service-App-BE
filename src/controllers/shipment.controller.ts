@@ -77,3 +77,40 @@ export async function searchShipment(req: AuthenticatedRequest, res: Response): 
         res.status(500).json({ message: "An unexpected error occurred during shipment search" });
     }
 }
+
+export async function findByUserId(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+        const userId = (req as any).user.id;
+
+        if (!userId) {
+            res.status(400).json({ message: "A valid user ID is required" });
+            return;
+        }
+
+        const loggedInUser = req.user;
+        if (!loggedInUser) {
+            res.status(401).json({ message: "Unauthorized. Authentication is required." });
+            return;
+        }
+
+        if (loggedInUser.id !== userId && loggedInUser.role !== "customer") {
+            res.status(403).json({ message: "Access denied. You are not authorized to view these shipments." });
+            return;
+        }
+
+        const shipments = await shipmentService.findByUserId(userId);
+
+        res.status(200).json({
+            message: "Shipments retrieved successfully",
+            shipments,
+        });
+    } catch (error: unknown) {
+        if (error instanceof AppError) {
+            res.status(error.statusCode).json({ message: error.message });
+            return;
+        }
+        console.error("Error in findByUserId controller:", error);
+        res.status(500).json({ message: "An unexpected error occurred during shipment retrieval" });
+    }
+}
+
