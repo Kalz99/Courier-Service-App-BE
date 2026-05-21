@@ -52,3 +52,28 @@ export async function getShipments(req: AuthenticatedRequest, res: Response): Pr
         res.status(500).json({ message: "An unexpected error occurred during shipment retrieval" });
     }
 }
+
+export async function searchShipment(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+        const trackingNumber = req.query.tracking;
+
+        const shipment = await shipmentService.searchShipments(trackingNumber as string);
+
+        if (!shipment) {
+            res.status(404).json({ message: "Shipment not found" });
+            return;
+        }
+
+        res.status(200).json({
+            message: "Shipment found successfully",
+            shipment,
+        });
+    } catch (error: unknown) {
+        if (error instanceof AppError) {
+            res.status(error.statusCode).json({ message: error.message });
+            return;
+        }
+        console.error("Error in search shipment controller:", error);
+        res.status(500).json({ message: "An unexpected error occurred during shipment search" });
+    }
+}

@@ -60,3 +60,12 @@ export async function getShipments(userId: string): Promise<ShipmentRow[]> {
     }
     return await shipmentRepository.findByUserId(userId);
 }
+
+export async function searchShipments(trackingNumber: string): Promise<ShipmentRow | null> {
+    console.log(typeof trackingNumber);
+    if (!trackingNumber || typeof trackingNumber !== "string" || trackingNumber.trim() === "") {
+        throw new AppError("A valid tracking number is required", 400);
+    }
+
+    return await shipmentRepository.findByTrackingNumber(trackingNumber);
+}
