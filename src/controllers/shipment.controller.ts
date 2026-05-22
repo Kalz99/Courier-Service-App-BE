@@ -5,7 +5,7 @@ import { AppError } from "../utils/errors.js";
 import { catchAsync } from "../utils/catchAsync.js";
 
 export const createShipment = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = (req as any).user.id;
+    const userId = req.user!.id;
 
     const shipmentInput = {
         recipientName: req.body.recipientName,
@@ -19,19 +19,21 @@ export const createShipment = catchAsync(async (req: AuthenticatedRequest, res: 
     const newShipment = await shipmentService.create(shipmentInput);
 
     res.status(201).json({
+        success: true,
         message: "Shipment created successfully",
-        shipment: newShipment,
+        data: newShipment,
     });
 });
 
 export const getShipments = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = (req as any).user.id;
+    const userId = req.user!.id;
 
     const shipments = await shipmentService.getShipments(userId);
 
     res.status(200).json({
+        success: true,
         message: "Shipments retrieved successfully",
-        shipments,
+        data: shipments,
     });
 });
 
@@ -45,32 +47,21 @@ export const searchShipment = catchAsync(async (req: AuthenticatedRequest, res: 
     }
 
     res.status(200).json({
-        message: "Shipment found successfully",
-        shipment,
+        success: true,
+        message: "Shipment details retrieved successfully",
+        data: shipment,
     });
 });
 
 export const findByUserId = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = (req as any).user.id;
-
-    if (!userId) {
-        throw new AppError("A valid user ID is required", 400);
-    }
-
-    const loggedInUser = req.user;
-    if (!loggedInUser) {
-        throw new AppError("Unauthorized. Authentication is required.", 401);
-    }
-
-    if (loggedInUser.id !== userId && loggedInUser.role !== "customer") {
-        throw new AppError("Access denied. You are not authorized to view these shipments.", 403);
-    }
+    const userId = req.user!.id;
 
     const shipments = await shipmentService.findByUserId(userId);
 
     res.status(200).json({
+        success: true,
         message: "Shipments retrieved successfully",
-        shipments,
+        data: shipments,
     });
 });
 
@@ -78,10 +69,8 @@ export const updateShipmentStatus = catchAsync(async (req: AuthenticatedRequest,
     const shipmentId = req.params.id as string;
     const { status } = req.body;
 
-    const loggedInUser = req.user;
-    if (!loggedInUser) {
-        throw new AppError("Unauthorized. Authentication is required.", 401);
-    }
+    const loggedInUser = req.user!;
+
     if (loggedInUser.role !== "admin") {
         throw new AppError("Access denied. Only administrators can update shipment status.", 403);
     }
