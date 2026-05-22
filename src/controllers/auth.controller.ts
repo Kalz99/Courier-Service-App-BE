@@ -1,88 +1,23 @@
 import type { Request, Response } from "express";
-import { z } from "zod";
 import * as authService from "../services/auth.service.js";
-import { AppError } from "../utils/errors.js";
+import { catchAsync } from "../utils/catchAsync.js";
 
-// Registration validation
-const registerSchema = z.object({
-    name: z.string({ message: "Your name is required" })
-        .trim()
-        .min(1, "Your name is required"),
-    email: z.string({ message: "A valid email is required" })
-        .trim()
-        .email("A valid email is required"),
-    password: z.string({ message: "Password must be at least 6 characters long" })
-        .min(6, "Password must be at least 6 characters long"),
-    address: z.string({ message: "Address must be a valid text" }).trim().optional(),
-    businessName: z.string({ message: "Business name must be a valid text" }).trim().optional(),
-    phone: z.string({ message: "Phone number is required" })
-        .trim()
-        .min(1, "Phone number is required"),
-    role: z.string().trim().optional(),
+export const register = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    const authData = await authService.registerUser(req.body);
+
+    res.status(201).json({
+        success: true,
+        message: "User registered successfully",
+        data: authData,
+    });
 });
 
+export const login = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    const authData = await authService.loginUser(req.body);
 
-const loginSchema = z.object({
-    email: z.string({ message: "Email is required" })
-        .trim()
-        .min(1, "Email is required!"),
-    password: z.string({ message: "Password is required" })
-        .min(1, "Password is required!"),
+    res.status(200).json({
+        success: true,
+        message: "Login successful",
+        data: authData,
+    });
 });
-
-
-function validateBody<T>(schema: z.Schema<T>, req: Request, res: Response): T | null {
-    const parseResult = schema.safeParse(req.body);
-    if (!parseResult.success) {
-        const firstError = parseResult.error.issues[0]?.message || "Validation error";
-        res.status(400).json({ message: firstError });
-        return null;
-    }
-    return parseResult.data;
-}
-
-
-export async function register(req: Request, res: Response): Promise<void> {
-    try {
-        const validatedData = validateBody(registerSchema, req, res);
-        if (!validatedData) return;
-
-        const authData = await authService.registerUser(validatedData);
-
-        res.status(201).json({
-            message: "User registered successfully",
-            ...authData,
-        });
-    } catch (error: unknown) {
-        if (error instanceof AppError) {
-            res.status(error.statusCode).json({ message: error.message });
-            return;
-        }
-        console.error("Error in registration controller:", error);
-        res.status(500).json({ message: "An unexpected error occurred during registration" });
-    }
-}
-
-
-export async function login(req: Request, res: Response): Promise<void> {
-    try {
-        const validatedData = validateBody(loginSchema, req, res);
-        if (!validatedData) return;
-
-        const authData = await authService.loginUser(validatedData);
-
-        res.status(200).json({
-            message: "Login successful",
-            ...authData,
-        });
-    } catch (error: unknown) {
-        if (error instanceof AppError) {
-            res.status(error.statusCode).json({ message: error.message });
-            return;
-        }
-        console.error("Error in login controller:", error);
-        res.status(500).json({ message: "An unexpected error occurred during login" });
-    }
-}
-
-
