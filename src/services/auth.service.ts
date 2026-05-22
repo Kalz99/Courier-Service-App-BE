@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { authRepository } from "../repository/auth.repository.js";
 import { AppError } from "../utils/errors.js";
 import type { UserRow, UserResponse, AuthResponse, RegisterInput, LoginInput } from "../types/auth.types.js";
-import { JWT_SECRET, JWT_EXPIRY } from "../config/jwt.js";
+import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
+
 
 
 export async function registerUser(input: RegisterInput): Promise<AuthResponse> {
@@ -29,17 +29,22 @@ export async function registerUser(input: RegisterInput): Promise<AuthResponse> 
 
     const newUserResponse = mapToUserResponse(createdUser);
 
-    const token = jwt.sign(
-        { userId: newUserResponse.id, email: newUserResponse.email, role: newUserResponse.role },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRY }
-    );
+    const tokenPayload = {
+        userId: newUserResponse.id,
+        email: newUserResponse.email,
+        role: newUserResponse.role,
+    };
+
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
 
     return {
         user: newUserResponse,
-        token,
+        accessToken,
+        refreshToken,
     };
 }
+
 
 export async function loginUser(input: LoginInput): Promise<AuthResponse> {
     const { email, password } = input;
@@ -56,15 +61,19 @@ export async function loginUser(input: LoginInput): Promise<AuthResponse> {
 
     const userResponse = mapToUserResponse(user);
 
-    const token = jwt.sign(
-        { userId: userResponse.id, email: userResponse.email, role: userResponse.role },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRY }
-    );
+    const tokenPayload = {
+        userId: userResponse.id,
+        email: userResponse.email,
+        role: userResponse.role,
+    };
+
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
 
     return {
         user: userResponse,
-        token,
+        accessToken,
+        refreshToken,
     };
 }
 

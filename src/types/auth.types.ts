@@ -24,7 +24,8 @@ export interface UserResponse {
 
 export interface AuthResponse {
     user: UserResponse;
-    token: string;
+    accessToken: string;
+    refreshToken: string;
 }
 
 export interface RegisterInput {
