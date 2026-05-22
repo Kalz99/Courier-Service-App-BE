@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import pool from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import shipmentRoutes from "./routes/shipment.routes.js";
+import { errorHandler } from "./middleware/error.middleware.js";
 
 dotenv.config();
 
@@ -14,6 +15,9 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/shipments", shipmentRoutes);
 app.use("/api", shipmentRoutes);
+
+// Error handling middleware
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
