@@ -2,22 +2,9 @@ import { z } from "zod";
 import { shipmentRepository } from "../repository/shipment.repository.js";
 import type { ShipmentRow, CreateShipmentDTO } from "../types/shipment.types.js";
 import { AppError } from "../utils/errors.js";
+import { createShipmentBodySchema } from "../validations/shipment.validation.js";
 
-const createShipmentSchema = z.object({
-    recipientName: z.string({ message: "Recipient name is required" })
-        .trim()
-        .min(1, "Recipient name is required"),
-    recipientAddress: z.string({ message: "Recipient address is required" })
-        .trim()
-        .min(1, "Recipient address is required"),
-    recipientPhoneNumber: z.string({ message: "Recipient phone number is required" })
-        .trim()
-        .min(1, "Recipient phone number is required"),
-    shipmentType: z.string({ message: "Shipment type is required" })
-        .trim()
-        .min(1, "Shipment type is required"),
-    weight: z.number({ message: "Weight must be a number" })
-        .positive("Weight must be greater than zero"),
+const createShipmentSchema = createShipmentBodySchema.extend({
     userId: z.string({ message: "User ID is required" })
         .trim()
         .min(1, "User ID must be valid"),

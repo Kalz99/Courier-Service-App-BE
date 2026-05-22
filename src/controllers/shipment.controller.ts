@@ -12,7 +12,7 @@ export async function createShipment(req: AuthenticatedRequest, res: Response): 
             recipientAddress: req.body.recipientAddress,
             recipientPhoneNumber: req.body.recipientPhoneNumber,
             shipmentType: req.body.shipmentType,
-            weight: Number(req.body.weight),
+            weight: req.body.weight,
             userId: userId
         };
 
@@ -55,9 +55,9 @@ export async function getShipments(req: AuthenticatedRequest, res: Response): Pr
 
 export async function searchShipment(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-        const trackingNumber = req.query.tracking;
+        const trackingNumber = req.query.tracking as string;
 
-        const shipment = await shipmentService.searchShipments(trackingNumber as string);
+        const shipment = await shipmentService.searchShipments(trackingNumber);
 
         if (!shipment) {
             res.status(404).json({ message: "Shipment not found" });
@@ -116,18 +116,8 @@ export async function findByUserId(req: AuthenticatedRequest, res: Response): Pr
 
 export async function updateShipmentStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-        const shipmentIdParam = req.params.id;
-
-        const shipmentId = Array.isArray(shipmentIdParam) ? shipmentIdParam[0] : shipmentIdParam;
-
-        if (!shipmentId || shipmentId.trim() === "") {
-            throw new AppError("A valid shipment ID string is required in the URL path.", 400);
-        }
-
+        const shipmentId = req.params.id as string;
         const { status } = req.body;
-        if (!status || typeof status !== "string" || status.trim() === "") {
-            throw new AppError("A valid status string is required in the request body.", 400);
-        }
 
         const loggedInUser = req.user;
         if (!loggedInUser) {
@@ -137,12 +127,12 @@ export async function updateShipmentStatus(req: AuthenticatedRequest, res: Respo
         if (loggedInUser.role !== "admin") {
             res.status(403).json({
                 success: false,
-                message: "Access denied. Only administrators can update shipment statuses."
+                message: "Access denied. Only administrators can update shipment status."
             });
             return;
         }
 
-        const updatedShipment = await shipmentService.updateShipmentStatus(shipmentId, status.trim());
+        const updatedShipment = await shipmentService.updateShipmentStatus(shipmentId, status);
 
         res.status(200).json({
             success: true,
@@ -156,7 +146,7 @@ export async function updateShipmentStatus(req: AuthenticatedRequest, res: Respo
             return;
         }
 
-        console.error("Error in updateShipmentStatus controller:", error);
+        console.error("Error in update shipment status:", error);
         res.status(500).json({
             success: false,
             message: "An unexpected error occurred during shipment status update."
