@@ -25,10 +25,24 @@ export class ShipmentRepository {
     `;
 
     private static readonly FIND_ALL = `
-        SELECT id, tracking_number, recipient_name, recipient_address, recipient_phone_number, shipment_type, weight, status, user_id, created_at 
-        FROM shipments 
-        ORDER BY created_at DESC
-        LIMIT $1 OFFSET $2
+      SELECT 
+        s.id, 
+        s.tracking_number, 
+        s.recipient_name, 
+        s.recipient_address, 
+        s.recipient_phone_number, 
+        s.shipment_type, 
+        s.weight, 
+        s.status, 
+        s.user_id, 
+        s.created_at,
+        u.name AS customer_name,         
+        u.phone_number AS customer_phone_number,
+        u.address AS customer_address
+      FROM shipments s
+      LEFT JOIN users u ON s.user_id = u.id
+      ORDER BY s.created_at DESC
+      LIMIT $1 OFFSET $2
     `;
 
     private static readonly UPDATE_STATUS = `

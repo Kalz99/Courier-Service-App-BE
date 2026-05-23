@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import pool from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import shipmentRoutes from "./routes/shipment.routes.js";
+import customerRoutes from "./routes/customer.routes.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 
 dotenv.config();
@@ -23,7 +24,9 @@ app.use(cookieParser());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/shipments", shipmentRoutes);
+app.use("/api/customers", customerRoutes);
 app.use("/api", shipmentRoutes);
+app.use("/api", customerRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
