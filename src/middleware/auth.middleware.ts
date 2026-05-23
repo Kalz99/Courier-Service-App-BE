@@ -30,3 +30,11 @@ export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: 
     }
 }
 
+export function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+    if (!req.user || req.user.role !== "admin") {
+        res.status(403).json({ success: false, message: "Access denied. Only administrators can perform this action." });
+        return;
+    }
+    next();
+}
+

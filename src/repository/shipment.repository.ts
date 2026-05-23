@@ -2,54 +2,12 @@ import pool from "../config/db.js";
 import type { ShipmentRow, CreateShipmentInput } from "../types/shipment.types.js";
 
 export class ShipmentRepository {
-    private static readonly CREATE_SHIPMENT = `
-        INSERT INTO shipments (
-            tracking_number, 
-            recipient_name, 
-            recipient_address, 
-            recipient_phone_number, 
-            shipment_type, 
-            weight, 
-            status, 
-            user_id
-        ) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-        RETURNING id, tracking_number, recipient_name, recipient_address, recipient_phone_number, shipment_type, weight, status, user_id, created_at
-    `;
 
-    private static readonly FIND_BY_USER_ID = `
+    private static readonly FIND_BY_USER_ID_AND_TRACKING = `
         SELECT id, tracking_number, recipient_name, recipient_address, recipient_phone_number, shipment_type, weight, status, user_id, created_at 
         FROM shipments 
-        WHERE user_id = $1 
+        WHERE user_id = $1 AND tracking_number ILIKE $2
         ORDER BY created_at DESC
-    `;
-
-    private static readonly FIND_ALL = `
-      SELECT 
-        s.id, 
-        s.tracking_number, 
-        s.recipient_name, 
-        s.recipient_address, 
-        s.recipient_phone_number, 
-        s.shipment_type, 
-        s.weight, 
-        s.status, 
-        s.user_id, 
-        s.created_at,
-        u.name AS customer_name,         
-        u.phone_number AS customer_phone_number,
-        u.address AS customer_address
-      FROM shipments s
-      LEFT JOIN users u ON s.user_id = u.id
-      ORDER BY s.created_at DESC
-      LIMIT $1 OFFSET $2
-    `;
-
-    private static readonly UPDATE_STATUS = `
-        UPDATE shipments 
-        SET status = $1 
-        WHERE id = $2 
-        RETURNING id, tracking_number, recipient_name, recipient_address, recipient_phone_number, shipment_type, weight, status, user_id, created_at
     `;
 
     private static readonly FIND_BY_TRACKING_NUMBER = `
@@ -66,56 +24,6 @@ export class ShipmentRepository {
         ORDER BY ssh.created_at DESC
     `;
 
-    private static readonly INSERT_STATUS_HISTORY = `
-    INSERT INTO shipment_status_history (shipment_id, status, updated_by)
-    VALUES ($1, $2, $3);
-    `;
-
-
-    async createShipment(input: CreateShipmentInput): Promise<ShipmentRow> {
-        const {
-            trackingNumber,
-            recipientName,
-            recipientAddress,
-            recipientPhoneNumber,
-            shipmentType,
-            weight,
-            status = "Pending",
-            userId,
-        } = input;
-
-        const result = await pool.query(
-            ShipmentRepository.CREATE_SHIPMENT,
-            [
-                trackingNumber,
-                recipientName,
-                recipientAddress,
-                recipientPhoneNumber,
-                shipmentType,
-                weight,
-                status,
-                userId,
-            ]
-        );
-
-        return result.rows[0];
-    }
-
-    private static readonly FIND_BY_USER_ID_AND_TRACKING = `
-        SELECT id, tracking_number, recipient_name, recipient_address, recipient_phone_number, shipment_type, weight, status, user_id, created_at 
-        FROM shipments 
-        WHERE user_id = $1 AND tracking_number ILIKE $2
-        ORDER BY created_at DESC
-    `;
-
-    async findByUserId(userId: string): Promise<ShipmentRow[]> {
-        const result = await pool.query(
-            ShipmentRepository.FIND_BY_USER_ID,
-            [userId]
-        );
-        return result.rows;
-    }
-
     async findByUserIdAndTracking(userId: string, tracking: string): Promise<ShipmentRow[]> {
         const result = await pool.query(
             ShipmentRepository.FIND_BY_USER_ID_AND_TRACKING,
@@ -130,35 +38,6 @@ export class ShipmentRepository {
             [trackingNumber.trim().toUpperCase()]
         );
         return result.rows[0] || null;
-    }
-
-
-    async findAll(limit: number = 10, offset: number = 0): Promise<ShipmentRow[]> {
-        const result = await pool.query(
-            ShipmentRepository.FIND_ALL,
-            [limit, offset]
-        );
-        return result.rows;
-    }
-
-
-    async updateStatus(id: string, status: string, updatedBy?: string): Promise<ShipmentRow | null> {
-        const result = await pool.query(
-            ShipmentRepository.UPDATE_STATUS,
-            [status, id]
-        );
-        const updated = result.rows[0] || null;
-        if (updated) {
-            await this.insertStatusHistory(updated.id, updated.status, updatedBy || updated.user_id);
-        }
-        return updated;
-    }
-
-    async insertStatusHistory(shipmentId: string, status: string, updatedBy: string): Promise<void> {
-        await pool.query(
-            ShipmentRepository.INSERT_STATUS_HISTORY,
-            [shipmentId, status, updatedBy]
-        );
     }
 
     async getStatusHistoryByTrackingNumber(trackingNumber: string): Promise<any[]> {
