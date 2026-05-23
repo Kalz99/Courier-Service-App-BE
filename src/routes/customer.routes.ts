@@ -5,5 +5,6 @@ import { authenticateJWT } from "../middleware/auth.middleware.js";
 const router = Router();
 
 router.get("/get-customers", authenticateJWT, customerController.getCustomers);
+router.get("/get-top-customers", authenticateJWT, customerController.getTopCustomers);
 
 export default router;

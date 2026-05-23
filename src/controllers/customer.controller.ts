@@ -18,3 +18,18 @@ export const getCustomers = catchAsync(async (req: AuthenticatedRequest, res: Re
         data: customers,
     });
 });
+
+export const getTopCustomers = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const loggedInUser = req.user!;
+    if (loggedInUser.role !== "admin") {
+        throw new AppError("Access denied. Only administrators can view top customers.", 403);
+    }
+
+    const topCustomers = await customerService.getTopCustomers();
+    
+    res.status(200).json({
+        success: true,
+        message: "Top customers retrieved successfully",
+        data: topCustomers,
+    });
+});

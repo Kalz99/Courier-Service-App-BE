@@ -25,8 +25,26 @@ export class CustomerRepository {
         ORDER BY u.created_at DESC
     `;
 
+    private static readonly GET_TOP_CUSTOMERS = `
+        SELECT 
+            u.name, 
+            COALESCE(u.phone_number, '') AS mobile, 
+            COALESCE(u.business_name, '') AS "businessName",
+            COUNT(s.id)::int AS "shipmentCount"
+        FROM users u
+        LEFT JOIN shipments s ON u.id = s.user_id
+        WHERE u.role = 'customer'
+        GROUP BY u.id, u.name, u.phone_number, u.business_name
+        ORDER BY "shipmentCount" DESC
+    `;
+
     async getAllCustomers(): Promise<CustomerDbRow[]> {
         const result = await pool.query(CustomerRepository.GET_ALL_CUSTOMERS);
+        return result.rows;
+    }
+
+    async getTopCustomers(): Promise<any[]> {
+        const result = await pool.query(CustomerRepository.GET_TOP_CUSTOMERS);
         return result.rows;
     }
 }
