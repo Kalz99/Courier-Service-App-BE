@@ -72,14 +72,18 @@ const updateShipmentStatusSchema = z.object({
     })
 });
 
-export async function updateShipmentStatus(id: string, status: string): Promise<ShipmentRow> {
+export async function updateShipmentStatus(id: string, status: string, updatedBy?: string): Promise<ShipmentRow> {
     const parseResult = updateShipmentStatusSchema.safeParse({ id, status });
     if (!parseResult.success) {
         const firstError = parseResult.error.issues[0]?.message || "Validation error";
         throw new AppError(firstError, 400);
     }
 
-    const updatedShipment = await shipmentRepository.updateStatus(parseResult.data.id, parseResult.data.status);
+    const updatedShipment = await shipmentRepository.updateStatus(
+        parseResult.data.id, 
+        parseResult.data.status,
+        updatedBy
+    );
     if (!updatedShipment) {
         throw new AppError("Shipment not found", 404);
     }
