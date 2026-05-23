@@ -28,6 +28,7 @@ router.get(
 );
 
 router.get("/get-my-shipment", authenticateJWT, shipmentController.findByUserId);
+router.get("/track-shipment", authenticateJWT, shipmentController.findByTrackingNumber);
 
 router.patch(
     "/update-shipment/:id/status",

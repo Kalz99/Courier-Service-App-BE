@@ -44,6 +44,14 @@ export class ShipmentRepository {
         WHERE tracking_number = $1
     `;
 
+    private static readonly FIND_STATUS_HISTORY_BY_TRACKING = `
+        SELECT ssh.id, ssh.shipment_id, ssh.status, ssh.updated_by, ssh.created_at 
+        FROM shipment_status_history ssh 
+        JOIN shipments s ON ssh.shipment_id = s.id 
+        WHERE s.tracking_number = $1 
+        ORDER BY ssh.created_at DESC
+    `;
+
     private static readonly INSERT_STATUS_HISTORY = `
     INSERT INTO shipment_status_history (shipment_id, status, updated_by)
     VALUES ($1, $2, $3);
@@ -137,6 +145,14 @@ export class ShipmentRepository {
             ShipmentRepository.INSERT_STATUS_HISTORY,
             [shipmentId, status, updatedBy]
         );
+    }
+
+    async getStatusHistoryByTrackingNumber(trackingNumber: string): Promise<any[]> {
+        const result = await pool.query(
+            ShipmentRepository.FIND_STATUS_HISTORY_BY_TRACKING,
+            [trackingNumber.trim().toUpperCase()]
+        );
+        return result.rows;
     }
 }
 

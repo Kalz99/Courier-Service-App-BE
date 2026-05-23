@@ -80,7 +80,7 @@ export async function updateShipmentStatus(id: string, status: string, updatedBy
     }
 
     const updatedShipment = await shipmentRepository.updateStatus(
-        parseResult.data.id, 
+        parseResult.data.id,
         parseResult.data.status,
         updatedBy
     );
@@ -89,5 +89,25 @@ export async function updateShipmentStatus(id: string, status: string, updatedBy
     }
 
     return updatedShipment;
+}
+
+export async function trackShipment(trackingNumber: string): Promise<any[]> {
+    if (
+        !trackingNumber ||
+        typeof trackingNumber !== "string" ||
+        trackingNumber.trim() === ""
+    ) {
+        throw new AppError("A valid tracking number is required", 400);
+    }
+    const history = await shipmentRepository.getStatusHistoryByTrackingNumber(
+        trackingNumber
+    );
+    if (!history || history.length === 0) {
+        throw new AppError(
+            "No tracking history found for this shipment",
+            404
+        );
+    }
+    return history;
 }
 
