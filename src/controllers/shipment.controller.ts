@@ -26,9 +26,14 @@ export const createShipment = catchAsync(async (req: AuthenticatedRequest, res: 
 });
 
 export const getShipments = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = req.user!.id;
 
-    const shipments = await shipmentService.getShipments(userId);
+    const loggedInUser = req.user!;
+    if (loggedInUser.role !== "admin") {
+        throw new AppError("Access denied. Only administrators can update shipment status.", 403);
+    }
+
+
+    const shipments = await shipmentService.getShipments();
 
     res.status(200).json({
         success: true,

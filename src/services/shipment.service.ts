@@ -48,11 +48,8 @@ export async function create(dto: CreateShipmentDTO): Promise<ShipmentRow> {
     return shipment;
 }
 
-export async function getShipments(userId: string): Promise<ShipmentRow[]> {
-    if (!userId) {
-        throw new AppError("A valid user ID is required", 400);
-    }
-    return await shipmentRepository.findByUserId(userId);
+export async function getShipments(): Promise<ShipmentRow[]> {
+    return await shipmentRepository.findAll();
 }
 
 export async function findByUserId(userId: string): Promise<ShipmentRow[]> {
