@@ -38,6 +38,13 @@ export async function create(dto: CreateShipmentDTO): Promise<ShipmentRow> {
         userId,
     });
 
+
+    await shipmentRepository.insertStatusHistory(
+        shipment.id,
+        shipment.status,
+        shipment.user_id
+    );
+
     return shipment;
 }
 
