@@ -8,5 +8,6 @@ const router = Router();
 
 router.post("/create-shipment", authenticateJWT, validate({ body: createShipmentBodySchema }), customerController.createShipment);
 router.get("/get-my-shipment", authenticateJWT, customerController.findByUserId);
+router.get("/get-my-status-counts", authenticateJWT, customerController.getMyShipmentStatusCounts);
 
 export default router;

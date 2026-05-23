@@ -8,6 +8,10 @@ import { AppError } from "../utils/errors.js";
 export const getCustomers = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const customers = await adminService.getAllCustomers();
 
+    if (!customers) {
+        throw new AppError("Failed to retrieve customers", 500);
+    }
+
     res.status(200).json({
         success: true,
         message: "Customers retrieved successfully",
@@ -17,6 +21,10 @@ export const getCustomers = catchAsync(async (req: AuthenticatedRequest, res: Re
 
 export const getTopCustomers = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const topCustomers = await adminService.getTopCustomers();
+
+    if (!topCustomers) {
+        throw new AppError("Failed to retrieve top customers", 500);
+    }
 
     res.status(200).json({
         success: true,
@@ -32,6 +40,10 @@ export const getShipments = catchAsync(async (req: AuthenticatedRequest, res: Re
     const offset = (page - 1) * limit;
 
     const shipments = await adminService.getShipments(limit, offset);
+
+    if (!shipments) {
+        throw new AppError("Failed to retrieve shipments", 500);
+    }
 
     res.status(200).json({
         success: true,
@@ -52,5 +64,19 @@ export const updateShipmentStatus = catchAsync(async (req: AuthenticatedRequest,
         success: true,
         message: "Shipment status updated successfully",
         data: updatedShipment,
+    });
+});
+
+export const getShipmentStatusCounts = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const counts = await adminService.getShipmentStatusCounts();
+
+    if (!counts) {
+        throw new AppError("Failed to retrieve status counts", 500);
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Status counts retrieved successfully",
+        data: counts,
     });
 });

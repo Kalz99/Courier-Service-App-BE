@@ -54,3 +54,30 @@ export async function findByUserId(userId: string): Promise<ShipmentRow[]> {
     }
     return await customerRepository.findByUserId(userId);
 }
+
+export async function getMyShipmentStatusCounts(userId: string): Promise<Record<string, number>> {
+    if (!userId) {
+        throw new AppError("A valid user ID is required", 400);
+    }
+
+    const counts = await shipmentTrackingRepository.getStatusCountsByUserId(userId);
+    if (!counts) {
+        throw new AppError("Failed to retrieve status counts", 500);
+    }
+    
+    const formatted: Record<string, number> = {
+        "Pending": 0,
+        "In Transit": 0,
+        "Out for Delivery": 0,
+        "Delivered": 0,
+        "Cancelled": 0
+    };
+
+    counts.forEach((row) => {
+        if (formatted[row.status] !== undefined) {
+            formatted[row.status] = row.count;
+        }
+    });
+
+    return formatted;
+}

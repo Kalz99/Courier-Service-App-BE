@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { adminRepository } from "../repository/admin.repository.js";
+import { shipmentTrackingRepository } from "../repository/shipmentTracking.repository.js";
 import { AppError } from "../utils/errors.js";
 import type { CustomerDbRow } from "../repository/admin.repository.js";
 import type { ShipmentRow } from "../types/shipment.types.js";
@@ -58,4 +59,27 @@ export async function updateShipmentStatus(id: string, status: string, updatedBy
     }
 
     return updatedShipment;
+}
+
+export async function getShipmentStatusCounts(): Promise<Record<string, number>> {
+    const counts = await shipmentTrackingRepository.getStatusCounts();
+    if (!counts) {
+        throw new AppError("Failed to retrieve status counts", 500);
+    }
+    
+    const formatted: Record<string, number> = {
+        "Pending": 0,
+        "In Transit": 0,
+        "Out for Delivery": 0,
+        "Delivered": 0,
+        "Cancelled": 0
+    };
+
+    counts.forEach((row) => {
+        if (formatted[row.status] !== undefined) {
+            formatted[row.status] = row.count;
+        }
+    });
+
+    return formatted;
 }
