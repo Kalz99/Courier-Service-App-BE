@@ -13,9 +13,8 @@ const createShipmentSchema = createShipmentBodySchema.extend({
 
 function generateTrackingNumber(): string {
     const prefix = "TN";
-    const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-    return `${prefix}-${datePart}-${randomPart}`;
+    const digits = Math.floor(100000000 + Math.random() * 900000000).toString();
+    return `${prefix}${digits}`;
 }
 
 export async function create(dto: CreateShipmentDTO): Promise<ShipmentRow> {

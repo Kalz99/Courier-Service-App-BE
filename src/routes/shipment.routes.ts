@@ -8,6 +8,6 @@ const router = Router();
 
 router.get("/search-shipment", authenticateJWT, validate({ query: searchShipmentQuerySchema }), shipmentController.searchShipment);
 
-router.get("/track-shipment", authenticateJWT, shipmentController.findByTrackingNumber);
+router.get("/track-shipment", shipmentController.findByTrackingNumber);
 
 export default router;
