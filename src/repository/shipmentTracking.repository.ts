@@ -12,16 +12,15 @@ export class ShipmentTrackingRepository {
 
     private static readonly GET_ALL_STATUS_COUNTS = `
         SELECT status, COUNT(*)::int as count 
-        FROM shipment_status_history 
+        FROM shipments 
         GROUP BY status
     `;
 
     private static readonly GET_USER_STATUS_COUNTS = `
-        SELECT ssh.status, COUNT(*)::int as count 
-        FROM shipment_status_history ssh
-        JOIN shipments s ON ssh.shipment_id = s.id
-        WHERE s.user_id = $1
-        GROUP BY ssh.status
+        SELECT status, COUNT(*)::int as count 
+        FROM shipments
+        WHERE user_id = $1
+        GROUP BY status
     `;
 
     async getStatusCounts(): Promise<{ status: string; count: number }[]> {

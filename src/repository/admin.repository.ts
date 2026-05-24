@@ -75,9 +75,15 @@ export class AdminRepository {
     `;
 
 
-    async getAllCustomers(): Promise<CustomerDbRow[]> {
-        const result = await pool.query(AdminRepository.GET_ALL_CUSTOMERS);
-        return result.rows;
+    async getAllCustomers(limit?: number, offset?: number): Promise<CustomerDbRow[]> {
+        if (limit !== undefined && offset !== undefined) {
+            const query = `${AdminRepository.GET_ALL_CUSTOMERS} LIMIT $1 OFFSET $2`;
+            const result = await pool.query(query, [limit, offset]);
+            return result.rows;
+        } else {
+            const result = await pool.query(AdminRepository.GET_ALL_CUSTOMERS);
+            return result.rows;
+        }
     }
 
     async getTopCustomers(): Promise<any[]> {

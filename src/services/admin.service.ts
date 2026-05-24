@@ -5,9 +5,7 @@ import { AppError } from "../utils/errors.js";
 import type { CustomerDbRow } from "../repository/admin.repository.js";
 import type { ShipmentRow } from "../types/shipment.types.js";
 
-// ---------------------------------------------------------------------------
-// Validation schemas
-// ---------------------------------------------------------------------------
+
 const updateShipmentStatusSchema = z.object({
     id: z.string({ message: "Shipment ID is required" }).trim().min(1, "Shipment ID must be valid"),
     status: z.enum(["Pending", "In Transit", "Out for Delivery", "Delivered", "Cancelled"], {
@@ -15,11 +13,9 @@ const updateShipmentStatusSchema = z.object({
     }),
 });
 
-// ---------------------------------------------------------------------------
-// Customer service functions
-// ---------------------------------------------------------------------------
-export async function getAllCustomers(): Promise<CustomerDbRow[]> {
-    const customers = await adminRepository.getAllCustomers();
+
+export async function getAllCustomers(limit?: number, offset?: number): Promise<CustomerDbRow[]> {
+    const customers = await adminRepository.getAllCustomers(limit, offset);
     if (!customers) {
         throw new AppError("Failed to retrieve customers from database", 500);
     }
@@ -34,9 +30,6 @@ export async function getTopCustomers(): Promise<any[]> {
     return topCustomers;
 }
 
-// ---------------------------------------------------------------------------
-// Shipment service functions (admin-only)
-// ---------------------------------------------------------------------------
 export async function getShipments(limit?: number, offset?: number): Promise<ShipmentRow[]> {
     return await adminRepository.getAllShipments(limit, offset);
 }
@@ -66,7 +59,7 @@ export async function getShipmentStatusCounts(): Promise<Record<string, number>>
     if (!counts) {
         throw new AppError("Failed to retrieve status counts", 500);
     }
-    
+
     const formatted: Record<string, number> = {
         "Pending": 0,
         "In Transit": 0,
