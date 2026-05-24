@@ -1,4 +1,4 @@
-# ⚡ ShipSync — Backend API
+# ⚡ ShipSync - Backend API
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-22.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js version" />
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <strong>A scalable RESTful API backend for managing courier shipments, tracking history, and role-based logistics operations.</strong><br />
-  Built with TypeScript, Express.js, and PostgreSQL using a clean layered architecture and raw SQL queries.
+  <strong>A scalable RESTful API backend for managing courier shipments, tracking history and role-based logistics operations.</strong><br />
+  Built with TypeScript, Express.js and PostgreSQL using a clean layered architecture and raw SQL queries.
 </p>
 
 ---
@@ -375,7 +375,7 @@ The application uses:
 
 # 👨‍💻 Development Notes
 
-This project was built as a full-stack PERN application focusing on:
+This application was built focusing on:
 
 * Clean architecture
 * Type safety
