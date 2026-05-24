@@ -13,26 +13,34 @@ dotenv.config();
 
 const app = express();
 
-
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://your-future-frontend.vercel.app'
+  'https://courier-service-app-be.onrender.com'
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
+  origin: (origin, callback) => {
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(",")
+      : [];
+    const isAllowedDomain = allowedOrigins.includes(origin);
+
+    if (isLocalhost || isAllowedDomain || process.env.NODE_ENV !== "production") {
       callback(null, true);
     } else {
-      callback(new Error('Blocked by CORS policy'));
+      callback(new Error("Blocked by CORS policy"));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+app.use(express.json());
 app.use(cookieParser());
 
 // Routes
