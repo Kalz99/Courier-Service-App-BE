@@ -13,31 +13,18 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://courier-service-app-be.onrender.com'
-];
-
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
 
-    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(",")
-      : [];
-    const isAllowedDomain = allowedOrigins.includes(origin);
-
-    if (isLocalhost || isAllowedDomain || process.env.NODE_ENV !== "production") {
+    const isLocalhost = /^http:\/\/localhost(:\d+)?$/.test(origin);
+    if (isLocalhost) {
       callback(null, true);
     } else {
-      callback(new Error("Blocked by CORS policy"));
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  credentials: true
 }));
 
 app.use(express.json());
