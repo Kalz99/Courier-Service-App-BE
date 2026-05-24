@@ -6,7 +6,11 @@ import { AppError } from "../utils/errors.js";
 
 
 export const getCustomers = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const customers = await adminService.getAllCustomers();
+    const page = req.query.page ? parseInt(req.query.page as string) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+    const offset = page && limit ? (page - 1) * limit : undefined;
+
+    const customers = await adminService.getAllCustomers(limit, offset);
 
     if (!customers) {
         throw new AppError("Failed to retrieve customers", 500);
