@@ -20,6 +20,7 @@
 
 * [Core Features](#-core-features)
 * [Technology Stack](#-technology-stack)
+* [Dependencies & Packages](#-dependencies--packages)
 * [Project Structure](#-project-structure)
 * [Database Schema](#-database-schema)
 * [API Endpoints](#-api-endpoints)
@@ -55,6 +56,30 @@
 | Validation        | Zod                |
 | Authentication    | JWT + bcrypt       |
 | API Style         | REST API           |
+
+---
+
+# 📦 Dependencies & Packages
+
+Here is a breakdown of all backend dependencies configured in [`package.json`](file:///d:/Github/Courier-Service-App/backend/package.json):
+
+### Core Dependencies
+
+* **`express`** (`^5.2.1`): Web application framework for routing, requests, responses, and middleware pipeline.
+* **`pg`** (`^8.21.0`): Non-blocking PostgreSQL client for Node.js. Used to interface directly with the database.
+* **`cors`** (`^2.8.6`): Express middleware to enable Cross-Origin Resource Sharing (CORS).
+* **`cookie-parser`** (`^1.4.7`): Cookie parsing middleware used to handle HTTP-only cookies (e.g. for refresh tokens).
+* **`jsonwebtoken`** (`^9.0.3`): Implementation of JSON Web Tokens for secure authentication and authorization.
+* **`bcrypt`** (`^6.0.0`): A library for hashing passwords, ensuring user password security in the database.
+* **`zod`** (`^4.4.3`): TypeScript-first schema declaration and validation library to validate incoming API request bodies and query parameters.
+* **`dotenv`** (`^17.4.2`): Loads environment variables from a `.env` file into `process.env`.
+
+### Development Dependencies
+
+* **`typescript`** (`^6.0.3`): TypeScript language support and compiler.
+* **`tsx`** (`^4.22.3`): TypeScript Execute. Used to watch and run typescript files directly (`tsx watch`) during development.
+* **`ts-node-dev`** (`^2.0.0`): Restarts target node process when any of the required files change.
+* **Type definitions** (`@types/*`): TypeScript declarations for type safety across all libraries (`@types/node`, `@types/express`, `@types/pg`, `@types/cors`, `@types/cookie-parser`, `@types/jsonwebtoken`, `@types/bcrypt`).
 
 ---
 
@@ -157,38 +182,50 @@ erDiagram
 
 # 🔌 API Endpoints
 
+> [!NOTE]
+> **API Mounting Note:**
+> In [`server.ts`](file:///d:/Github/Courier-Service-App/backend/src/server.ts), routes are mounted with both specific prefixes (`/api/shipments`, `/api/admin`) and general API prefixes (`/api`). This means the shipment and admin endpoints can be queried using either URL style (e.g., `/api/admin/get-shipment` or `/api/get-shipment`).
+
+## 🩺 System Check — `/` (Root)
+
+| Method | Endpoint | Description | Access |
+| :----- | :------- | :---------- | :----- |
+| GET    | `/`      | Database Connection & Server Health Check (Returns DB local time) | Public |
+
+---
+
 ## 🔑 Authentication — `/api/auth`
 
-| Method | Endpoint    | Description               |
-| :----- | :---------- | :------------------------ |
-| POST   | `/register` | Register new user         |
-| POST   | `/login`    | Login user                |
-| POST   | `/refresh`  | Generate new access token |
-| POST   | `/logout`   | Logout user               |
+| Method | Endpoint    | Description               | Access |
+| :----- | :---------- | :------------------------ | :----- |
+| POST   | `/register` | Register new user         | Public |
+| POST   | `/login`    | Login user                | Public |
+| POST   | `/refresh`  | Generate new access token | Public (Requires Refresh Cookie) |
+| POST   | `/logout`   | Logout user               | Public |
 
 ---
 
-## 📦 Shipment Routes — `/api/shipments`
+## 📦 Shipment Routes — `/api/shipments` (also mounted at `/api`)
 
-| Method | Endpoint                | Access   |
-| :----- | :---------------------- | :------- |
-| POST   | `/create-shipment`      | Customer |
-| GET    | `/get-my-shipment`      | Customer |
-| GET    | `/get-my-status-counts` | Customer |
-| GET    | `/search-shipment`      | Customer |
-| GET    | `/track-shipment`       | Public   |
+| Method | Endpoint                | Description | Access |
+| :----- | :---------------------- | :---------- | :----- |
+| POST   | `/create-shipment`      | Creates a new shipment | Customer |
+| GET    | `/get-my-shipment`      | Retrieves shipments belonging to current customer | Customer |
+| GET    | `/get-my-status-counts` | Retrieves status counts for customer's shipments | Customer |
+| GET    | `/search-shipment`      | Searches a shipment by tracking number | Customer |
+| GET    | `/track-shipment`       | Tracks a shipment chronologically (no auth required) | Public |
 
 ---
 
-## 🛡️ Admin Routes — `/api/admin`
+## 🛡️ Admin Routes — `/api/admin` (also mounted at `/api`)
 
-| Method | Endpoint                      | Access |
-| :----- | :---------------------------- | :----- |
-| GET    | `/get-shipment`               | Admin  |
-| PATCH  | `/update-shipment/:id/status` | Admin  |
-| GET    | `/get-status-counts`          | Admin  |
-| GET    | `/get-customers`              | Admin  |
-| GET    | `/get-top-customers`          | Admin  |
+| Method | Endpoint                      | Description | Access |
+| :----- | :---------------------------- | :---------- | :----- |
+| GET    | `/get-shipment`               | Retrieves all shipments (paginated) | Admin |
+| PATCH  | `/update-shipment/:id/status` | Updates shipment status & appends to status history | Admin |
+| GET    | `/get-status-counts`          | Retrieves global status counts of all shipments | Admin |
+| GET    | `/get-customers`              | Retrieves list of all customers (paginated) | Admin |
+| GET    | `/get-top-customers`          | Retrieves top customers by shipment count | Admin |
 
 ---
 
@@ -205,16 +242,36 @@ erDiagram
 ## 1. Clone Repository
 
 ```bash
-git clone https://github.com/your-username/courier-service-app.git
-cd courier-service-app/backend
+git clone https://github.com/Kalz99/Courier-Service-App-BE.git
+cd Courier-Service-App-BE
 ```
 
 ---
 
 ## 2. Install Dependencies
 
+The backend project has multiple runtime and development dependencies. You can install all of them at once (standard installation), or manually choose to install production and development dependencies separately.
+
+### Option A: Standard Installation (Recommended)
+
+Run the following command from the `backend` folder to install all dependencies specified in `package.json`:
+
 ```bash
 npm install
+```
+
+### Option B: Individual Installations
+
+If you prefer to install the packages manually or need to rebuild the environment, use the following commands:
+
+#### 1. Core Production Dependencies
+```bash
+npm install express pg cors cookie-parser jsonwebtoken bcrypt zod dotenv
+```
+
+#### 2. Development & Type Definitions
+```bash
+npm install -D typescript tsx ts-node-dev @types/node @types/express @types/pg @types/cors @types/cookie-parser @types/jsonwebtoken @types/bcrypt
 ```
 
 ---
